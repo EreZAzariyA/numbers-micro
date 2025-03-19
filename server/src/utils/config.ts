@@ -1,12 +1,17 @@
 require('dotenv').config();
+import { name, version } from '../../package.json';
 
 abstract class Config {
+  public name: string = name;
+  public version: string = version;
   public port: number = +process.env.PORT;
   public isProduction: boolean;
   public loginExpiresIn: string;
   public mongoConnectionString: string;
   public secretKey = process.env.SECRET_KEY || "SECRET_KEY";
   public corsUrls: string[];
+  public serviceRegistryUrl: string = process.env.SERVICE_REGISTRY_URL;
+  public serviceVersion: string = '1.x.x';
 };
 
 class DevelopmentConfig extends Config {

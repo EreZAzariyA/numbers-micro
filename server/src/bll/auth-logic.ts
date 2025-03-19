@@ -5,6 +5,8 @@ import { IUserModel, UserModel } from "../models/user-model";
 import { comparePassword, encryptPassword } from "../utils/bcrypt-utils";
 import jwt from "../utils/jwt";
 import google from "../utils/google";
+import { googleClient } from "../dal/google";
+import { ErrorMessages } from "../utils/helpers";
 
 class AuthenticationLogic {
   signup = async (user: IUserModel): Promise<string> => {
@@ -44,21 +46,36 @@ class AuthenticationLogic {
     }
   };
 
-  google = async (userDetailsByGoogle: CredentialRequest): Promise<string> => {
-    const email = await google.getUserEmailFromGoogleToken(userDetailsByGoogle.access_token);
-    const isSigned = await UserModel.exists({'emails.email': email}).exec();
+  google = async (credential: string, clientId: string): Promise<string> => {
+    const loginTicket = await googleClient.verifyIdToken({ idToken: credential, audience: clientId });
+    const email = loginTicket.getPayload().email;
 
-    let user: IUserModel = null;
-    if (isSigned) {
-      user = await UserModel.findOne({'emails.email': email}).select('-services').exec();
-    } else {
-      const payload = await google.getGoogleDetails(userDetailsByGoogle.access_token);
-      user = await google.createUserForGoogleAccounts(payload);
+    if (!email) {
+      throw new ClientError(400 ,'Some error while trying to get the user email')
     }
 
-    const token = jwt.getNewToken(user.toObject());
+    const isSigned = await UserModel.exists({ 'emails.email': email }).exec();
+    let user: IUserModel = null;
+
+    if (isSigned) {
+      user = await UserModel.findOne({ 'emails.email': email }).select('-services').exec();
+    } else {
+      const payload = loginTicket.getPayload();
+      user = await google.createUserForGoogleAccounts(payload);
+    }
+    if (!user) {
+      throw new ClientError(500, ErrorMessages.SOME_ERROR);
+    }
+
+    const userWithoutServices = this.removeServicesFromUser(user);
+    const token = jwt.getNewToken(userWithoutServices);
     return token;
   };
+  private removeServicesFromUser = (user: IUserModel): IUserModel => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { services, ...rest } = user.toObject();
+    return rest;
+  }
 };
 
 const authLogic = new AuthenticationLogic();

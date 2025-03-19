@@ -1,13 +1,6 @@
-import { CredentialRequest, TokenPayload } from "google-auth-library";
+import { TokenPayload } from "google-auth-library";
 import ClientError from "../models/client-error";
 import { IUserModel, UserModel } from "../models/user-model";
-import { googleClient } from "../dal/google";
-
-const getUserEmailFromGoogleToken = async (token: string): Promise<string> => {
-  const google = googleClient;
-  const userinfo = await google.getTokenInfo(token);
-  return userinfo.email;
-};
 
 const getGoogleDetails = async (token: string): Promise<TokenPayload> => {
   if (!token) {
@@ -32,9 +25,9 @@ const createUserForGoogleAccounts = (payload: TokenPayload): Promise<IUserModel>
       isValidate: payload.email_verified
     },
     profile: {
-      first_name: payload.given_name,
-      last_name: payload.family_name,
-      image: payload.picture
+      first_name: payload.given_name || '',
+      last_name: payload.family_name || '',
+      image_url: payload.picture || ''
     },
     services: {
       google: { ...payload }
@@ -43,13 +36,15 @@ const createUserForGoogleAccounts = (payload: TokenPayload): Promise<IUserModel>
 
   const errors = user.validateSync();
   if (errors) {
-    throw new ClientError(500, errors.message);
+    Object.keys(errors.errors).forEach((field) => {
+      throw new ClientError(500, errors.errors[field].message);
+    });
   };
+
   return user.save();
 };
 
 export default {
-  getUserEmailFromGoogleToken,
   getGoogleDetails,
   createUserForGoogleAccounts
-}
+};
