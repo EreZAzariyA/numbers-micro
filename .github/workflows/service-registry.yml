@@ -1,11 +1,11 @@
-name: Build and Test Server
+name: Build and Test Service Registry
 
 on:
   push:
     branches:
       - 'release'
     paths:
-      - 'server/**'
+      - 'services-registry/**'
 
 jobs:
   build:
@@ -17,9 +17,9 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: '20'
-      - name: Install dependencies for server
-        working-directory: ./server
+      - name: Install dependencies for services-registry
+        working-directory: ./services-registry
         run: npm install
       - name: Compile TypeScript
-        working-directory: ./server
+        working-directory: ./services-registry
         run: npx tsc
