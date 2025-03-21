@@ -3,6 +3,7 @@ name: Build and Test Bank Scrapper Service
 on:
   push:
     branches:
+      - 'master'
       - 'release'
     paths:
       - 'bank-scrapper-service/**'

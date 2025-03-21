@@ -3,6 +3,7 @@ name: Build and Test Service Registry
 on:
   push:
     branches:
+      - 'master'
       - 'release'
     paths:
       - 'services-registry/**'

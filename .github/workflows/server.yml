@@ -3,6 +3,7 @@ name: Build and Test Server
 on:
   push:
     branches:
+      - 'master'
       - 'release'
     paths:
       - 'server/**'
