@@ -1,4 +1,5 @@
 import cors from "cors";
+import { exec } from "child_process";
 import express, { NextFunction, Request, Response } from "express";
 import connectToMongoDB from "./dal/dal";
 import config from "./utils/config";
@@ -6,6 +7,7 @@ import routes from "./routes";
 import errorsHandler from "./middlewares/errors-handler";
 import verifyToken from "./middlewares/verify-token";
 import { importTransactions } from "./bll/transactions";
+import path from "path";
 
 const app = express();
 app.use(cors({
@@ -32,6 +34,20 @@ app.post('/api/import-transactions/:user_id', async (req: Request, res: Response
   } catch (err: any) {
     next(err);
   }
+});
+
+const scriptPath = path.join(__dirname, '..', 'deploy.sh');
+app.post('/deploy', (_, res: Response) => {
+  console.log(`Received POST request to deploy. executing from ${scriptPath}`);
+  exec(scriptPath, (err, stdout, stderr) => {
+    if (err) {
+      console.error(`Error executing script: ${err}`);
+      return res.status(500).send(`Error executing script: ${stderr}`);
+    }
+
+    console.log(`Deployment successful!!.. Script output: ${stdout}`);
+    res.status(200).send('Deployment successful');
+  });
 });
 
 app.use("*", (_, res: Response) => {
