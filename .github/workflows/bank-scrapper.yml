@@ -1,0 +1,26 @@
+name: Build and Test Bank Scrapper Service
+
+on:
+  push:
+    branches:
+      - 'master'
+      - 'release'
+    paths:
+      - 'bank-scrapper-service/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '20'
+      - name: Install dependencies for bank scrapper service
+        working-directory: ./bank-scrapper-service
+        run: npm install
+      - name: Compile TypeScript
+        working-directory: ./bank-scrapper-service
+        run: npx tsc

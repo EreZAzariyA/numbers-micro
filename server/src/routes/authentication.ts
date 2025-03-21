@@ -1,12 +1,13 @@
 import express, { NextFunction, Request, Response } from "express";
 import authLogic from "../bll/auth-logic";
 import CredentialsModel from "../models/credentials-model";
+import { UserModel } from "../models/user-model";
 
 const router = express.Router();
 
 router.post("/signup", async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const user = req.body;
+    const user = new UserModel(req.body);
     const token = await authLogic.signup(user);
     res.status(201).json(token);
   } catch (err: any) {
@@ -24,9 +25,18 @@ router.post("/signin", async (req: Request, res: Response, next: NextFunction) =
   }
 });
 
+router.post("/logout", async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    res.sendStatus(201);
+  } catch (err: any) {
+    next(err);
+  }
+});
+
 router.post("/google", async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const token = await authLogic.google(req.body);
+    const { credential, clientId } = req.body
+    const token = await authLogic.google(credential, clientId);
     res.status(201).json(token);
   } catch (err: any) {
     next(err);

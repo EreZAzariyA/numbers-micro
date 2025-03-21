@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: main-server
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: main-server
+  template:
+    metadata:
+      labels:
+        app: main-server
+    spec:
+      containers:
+        - name: main-server
+          image: erezazariya/server:latest
+          ports:
+            - containerPort: 5000
+          env:
+            - name: SERVICE_REGISTRY_URL
+              value: "http://service-registry:5001" # microservice1 port 5001
+            - name: MONGO_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-credentials  # Secret name
+                  key: mongo-connection-string  # Key inside the Secret
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          command: ["npm", "start"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: main-server
+spec:
+  selector:
+    app: main-server
+  ports:
+    - protocol: TCP
+      port: 5000    # Internal port
+      targetPort: 5000
+      nodePort: 30000  # Exposed external port
+  type: NodePort

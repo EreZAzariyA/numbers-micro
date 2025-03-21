@@ -1,4 +1,5 @@
 import express, { NextFunction, Request, Response } from "express";
+import { CategoryModel } from "../models/category-model";
 import categoriesLogic from "../bll/categories-logic";
 
 const router = express.Router();
@@ -13,30 +14,32 @@ router.get("/:user_id", async (req: Request, res: Response, next: NextFunction) 
   }
 });
 
-router.post("/", async (req: Request, res: Response, next: NextFunction) => {
+router.post("/:user_id", async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const category = req.body;
-    const addedCategory = await categoriesLogic.addNewCategory(category);
+    const user_id = req.params.user_id;
+    const categoryName = req.body.categoryName;
+    const addedCategory = await categoriesLogic.addNewCategory(categoryName, user_id);
     res.status(201).json(addedCategory);
   } catch (err: any) {
     next(err);
   }
 });
 
-router.put("/", async (req: Request, res: Response, next: NextFunction) => {
+router.put("/:user_id", async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const categoryToUpdate = req.body;
-    const updatedCategory = await categoriesLogic.updateCategory(categoryToUpdate);
+    const user_id = req.params.user_id;
+    const categoryToUpdate = new CategoryModel(req.body);
+    const updatedCategory = await categoriesLogic.updateCategory(categoryToUpdate, user_id);
     res.status(201).json(updatedCategory);
   } catch (err: any) {
     next(err);
   }
 });
 
-router.delete("/:category_id", async (req: Request, res: Response, next: NextFunction) => {
+router.delete("/", async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const category_id = req.params.category_id;
-    await categoriesLogic.removeCategory(category_id);
+    const { category_id, user_id } = req.body;
+    await categoriesLogic.removeCategory(category_id, user_id);
     res.sendStatus(200);
   } catch (err: any) {
     next(err);
