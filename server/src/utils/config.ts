@@ -30,7 +30,7 @@ class ProductionConfig extends Config {
     this.isProduction = true;
     this.loginExpiresIn = "30m";
     this.mongoConnectionString = process.env.MONGO_CONNECTION_STRING;
-    this.corsUrls = ['https://ea-numbers.vercel.app', 'https://ea-numbers-test.vercel.app'];
+    this.corsUrls = ['http://localhost:3000', 'https://ea-numbers.vercel.app', 'https://ea-numbers-test.vercel.app'];
   };
 };
 
