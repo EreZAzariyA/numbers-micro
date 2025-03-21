@@ -39,19 +39,19 @@ class Microservices {
       const { ip, port, name, version } = service;
       this.services[key] = { name, version, port, ip };
       this.services[key].timestamp = new Date().valueOf();
-      config.log.debug(`Added services ${name}, version ${version} at ${ip}:${port}`);
+      config.log.info(`Added services ${name}, version ${version} at ${ip}:${port}`);
       return key;
     }
 
     this.services[key].timestamp = new Date().valueOf();
-    config.log.debug(`Updated services ${service.name}, version ${service.version} at ${service.ip}:${service.port}`);
+    config.log.info(`Updated services ${service.name}, version ${service.version} at ${service.ip}:${service.port}`);
     return key;
   };
 
   unregister(service: Service) {
     const key = this.getKey(service);
     delete this.services[key];
-    config.log.debug(`Unregistered services ${service.name}, version ${service.version} at ${service.ip}:${service.port}`);
+    config.log.info(`Unregistered services ${service.name}, version ${service.version} at ${service.ip}:${service.port}`);
     return key;
   };
 
@@ -60,7 +60,7 @@ class Microservices {
     Object.keys(this.services).forEach((key) => {
       if (this.services[key].timestamp + this.timeout < now) {
         delete this.services[key];
-        config.log.debug(`Removing service ${key}`);
+        config.log.info(`Removing service ${key}`);
       }
     });
   };
