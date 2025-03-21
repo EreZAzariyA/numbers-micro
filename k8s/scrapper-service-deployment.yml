@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bank-scrapper-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: bank-scrapper-service
+  template:
+    metadata:
+      labels:
+        app: bank-scrapper-service
+    spec:
+      containers:
+        - name: bank-scrapper-service
+          image: erezazariya/bank-scrapper-service:latest
+          ports:
+            - containerPort: 5002  # microservice1 port
+          env:
+            - name: SERVICE_REGISTRY_URL
+              value: "http://service-registry:5001" # microservice1 port 5001
+            - name: SERVER_URL
+              value: "http://main-server:5000" # microservice1 port 5001
+            - name: MONGO_CONNECTION_STRING
+              valueFrom:
+                secretKeyRef:
+                  name: mongo-credentials  # Secret name
+                  key: mongo-connection-string  # Key inside the Secret
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          command: ["npm", "start"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: bank-scrapper-service
+spec:
+  selector:
+    app: bank-scrapper-service
+  ports:
+    - protocol: TCP
+      port: 5002  # Expose microservice1 on port 5001 internally
+      targetPort: 5002
+  type: ClusterIP

@@ -6,21 +6,21 @@ enum ENV_TYPE {
   PRODUCTION = 'production',
 };
 
-const getLogger = (name: string, version: string, level: LogLevel) => (
-  bunyan.createLogger({ name: `${name}:${version}`, level })
-);
+const getLogger = (name: string, version: string, level: LogLevel) => {
+  return bunyan.createLogger({
+    name: `${name}:${version}`,
+    level,
+    streams: [
+      {
+        stream: process.stdout,
+        level
+      }
+    ]
+  });
+};
 
-const getLogLevel = (envType: ENV_TYPE.DEVELOPMENT | ENV_TYPE.PRODUCTION) => {
-  let logLevel: LogLevel;
-  switch(envType) {
-    case ENV_TYPE.DEVELOPMENT:
-      logLevel = 'debug';
-      break;
-    default:
-      logLevel = 'info';
-  };
-
-  return logLevel;
+const getLogLevel = (envType: ENV_TYPE): LogLevel => {
+  return envType === ENV_TYPE.DEVELOPMENT ? "debug" : "info";
 };
 
 export {

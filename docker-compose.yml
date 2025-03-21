@@ -1,0 +1,15 @@
+version: '3.7'
+
+services:
+  server:
+    build:
+      context: ./server
+      dockerfile: ./server/dockerfile
+    volumes:
+      - ./server/src:/home/node/app/src
+    container_name: server
+    expose:
+      - 5000
+    ports:
+      - 5000:5000
+    command: npm run start

@@ -13,16 +13,16 @@ app.use(cors({ origin: '*'}));
 
 app.use('/', router);
 
-if (!config.port || typeof config.port !== 'number' || isNaN(config.port)) {
-  console.warn({ PORT: config?.port }, 'Invalid port number');
+if (config.port && typeof config.port !== 'number' || isNaN(config.port)) {
+  config.log.fatal({ PORT: config?.port }, 'Invalid port number');
   process.exit(0);
 };
 
 const server = app.listen(config.port, () => {
   const port = (server.address() as any).port;
-  const url = process.env.SERVICE_REGISTRY_URL;
+  const url = process.env.SERVICE_REGISTRY_URL || 'http://localhost:5001';
   if (!url) {
-    config.log.warn({ SERVICE_REGISTRY_URL: url }, 'Service registry url not found');
+    config.log.fatal({ SERVICE_REGISTRY_URL: url }, 'Service registry url not found');
     process.exit(0);
   }
 
@@ -37,25 +37,25 @@ const server = app.listen(config.port, () => {
     await unregisterService();
   };
 
-  process.on('uncaughtException', async() => {
+  process.on('uncaughtException', async () => {
     await cleanup();
     process.exit(0);
   });
 
-  process.on('SIGINT', async() => {
+  process.on('SIGINT', async () => {
     await cleanup();
     process.exit(0);
   });
 
-  process.on('SIGTERM', async() => {
+  process.on('SIGTERM', async () => {
     await cleanup();
     process.exit(0);
   });
 
-  console.log(`Listening on port ${port} on ${app.get('env')} mode`);
+  config.log.info(`Listening on port ${port} on ${app.get('env')} mode`);
 
   connectToMongoDB().then((collectionName) => {
-    console.log(`Successfully connected to: ${collectionName}`);
+    config.log.info(`Successfully connected to: ${collectionName}`);
   });
 });
 

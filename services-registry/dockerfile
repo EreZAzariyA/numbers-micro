@@ -1,0 +1,15 @@
+FROM node:latest
+
+WORKDIR /usr/src/app/service-registry
+
+COPY package.json ./
+COPY tsconfig.json ./
+
+RUN npm install
+
+ENV PORT=5001
+ENV NODE_ENV=production
+
+COPY . .
+
+RUN npm run build
