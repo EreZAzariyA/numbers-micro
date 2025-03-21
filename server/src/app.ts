@@ -1,4 +1,3 @@
-import axios from "axios";
 import cors from "cors";
 import express, { NextFunction, Request, Response } from "express";
 import connectToMongoDB from "./dal/dal";
@@ -9,7 +8,11 @@ import verifyToken from "./middlewares/verify-token";
 import { importTransactions } from "./bll/transactions";
 
 const app = express();
-app.use(cors({ origin: config.corsUrls, credentials: true }));
+app.use(cors({
+  origin: config.corsUrls,
+  credentials: true,
+  methods: 'GET,POST,PUT,DELETE,PATCH'
+}));
 app.use(express.json());
 
 app.use('/api/auth', routes.authenticationRouter);
