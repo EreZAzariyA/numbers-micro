@@ -1,22 +1,39 @@
-import { Document, Schema, model } from "mongoose";
+import { Document, model, Schema } from "mongoose";
 
 export interface ICategoryModel extends Document {
-  // _id: Schema.Types.ObjectId;
-  user_id: String;
-  name: String;
+  name: string;
+  spent: number;
+  maximumSpentAllowed?: {
+    active: boolean;
+    maximumAmount: number;
+  }
 };
 
-const CategorySchema = new Schema<ICategoryModel>({
-  // _id: Schema.Types.ObjectId,
-  user_id: Schema.Types.ObjectId,
+export const CategorySchema = new Schema<ICategoryModel>({
   name: {
     type: String,
     trim: true,
     required: [true, "Category name is missing"],
   },
+  spent: {
+    type: Number,
+    trim: true,
+    required: [true, "Expected spent amount is missing"],
+    default: 0
+  },
+  maximumSpentAllowed: {
+    type: Object,
+    active: {
+      type: Boolean,
+      default: false,
+    },
+    maximumAmount: {
+      type: Number,
+      default: 0
+    }
+  }
 }, {
   versionKey: false,
-  autoIndex: true,
 });
 
-export const CategoryModel = model<ICategoryModel>('CategoryModel', CategorySchema, 'categories');
+export const CategoryModel = model<ICategoryModel>('Category', CategorySchema);

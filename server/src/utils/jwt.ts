@@ -5,13 +5,13 @@ import { IUserModel } from "../models/user-model";
 
 const secretKey = config.secretKey;
 
-function getNewToken(user: IUserModel, customExpiresIn?: string): string {
-  const token = jwt.sign(user, secretKey, { expiresIn: customExpiresIn || config.loginExpiresIn });
+function getNewToken(user: IUserModel, customExpiresIn?: number): string {
+  const token = jwt.sign(user, secretKey, { expiresIn: customExpiresIn || +config.loginExpiresIn });
   return token;
 };
 
-function createNewToken(data: any, customExpiresIn?: string): string {
-  const token = jwt.sign(data, secretKey, { expiresIn: customExpiresIn || config.loginExpiresIn });
+function createNewToken(data: any, customExpiresIn?: number): string {
+  const token = jwt.sign(data, secretKey, { expiresIn: customExpiresIn || +config.loginExpiresIn });
   return token;
 };
 
